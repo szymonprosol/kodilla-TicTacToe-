@@ -1,2 +1,6 @@
+com/kodilla/tictactoe/MyButton.java
+ com.kodilla.tictactoe.MyButton
+com/kodilla/tictactoe/Controller.java
+ com.kodilla.tictactoe.Controller
 com/kodilla/tictactoe/TicTacToe.java
  com.kodilla.tictactoe.TicTacToe
