@@ -1,6 +1,5 @@
 package com.kodilla.tictactoe;
 
-import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
 public class MyButton extends Rectangle {
