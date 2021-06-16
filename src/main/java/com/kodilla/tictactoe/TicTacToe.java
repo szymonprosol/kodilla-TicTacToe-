@@ -8,9 +8,10 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
+
 public class TicTacToe extends Application {
 
-    private Label status = new Label("Twój ruch");
+    private Label status = new Label();
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -28,10 +29,21 @@ public class TicTacToe extends Application {
                 Controller.getInstance().addButton(button);
             }
         }
+        // new game button
+        NewGameButton nGmButton = new NewGameButton();
+        grid.add(nGmButton,3,2,1,1);
 
+        // choose X button
+        Choose_X chooseX = new Choose_X();
+        grid.add(chooseX,3,0,1,1);
+        // choose O button
+        Choose_O chooseO = new Choose_O();
+        grid.add(chooseO,4,0,1,1);
+        // status label
+        status = Controller.getInstance().getStatus();
         grid.add(status, 3, 1, 1, 1);
 
-        Scene scene = new Scene(grid, 900, 620, Color.BLUE);
+        Scene scene = new Scene(grid, 960, 620, Color.BLUE);
 
         primaryStage.setTitle("Tic Tac Toe");
         primaryStage.setScene(scene);
