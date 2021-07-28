@@ -1,13 +1,15 @@
 package com.kodilla.tictactoe;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
+import java.util.stream.Collectors;
+
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.stream.Collectors;
 
 public class Controller {
 
@@ -17,7 +19,7 @@ public class Controller {
     private char myChar = 0;
     private char compChar = 0;
     private char[][] array = new char[3][3];
-    private int liczbaRuchow = 0;
+    private int numberOfMoves = 0;
     private Label status = new Label();
     private boolean gameOver = false;
 
@@ -57,7 +59,7 @@ public class Controller {
     }
 
     public void setXChar(Choose_X chooseX) {
-        if (liczbaRuchow != 0) {
+        if (numberOfMoves != 0) {
             status.setText("Zakończ obecną rozgrywkę");
         } else {
             myChar = 'X';
@@ -66,7 +68,7 @@ public class Controller {
     }
 
     public void setOChar(Choose_O chooseO) {
-        if (liczbaRuchow != 0) {
+        if (numberOfMoves != 0) {
             status.setText("Zakończ obecną rozgrywkę");
         } else {
             myChar = 'O';
@@ -79,7 +81,7 @@ public class Controller {
         myChar = 0;
         compChar = 0;
         array = new char[3][3];
-        liczbaRuchow = 0;
+        numberOfMoves = 0;
         myButtons.stream()
                 .forEach(el -> el.setChar(null));
         myButtons.stream()
@@ -91,7 +93,7 @@ public class Controller {
         if (endComp()) {
             status.setText("WYGRAŁ KOMPUTER!");
             gameOver = true;
-        } else if (liczbaRuchow == 9) {
+        } else if (numberOfMoves == 9) {
             status.setText("Brak możliwości ruchu - REMIS!");
             gameOver = true;
         } else {
@@ -101,23 +103,66 @@ public class Controller {
 
     private void makeComputerMove() {
         if (!gameOver) {
-            List<MyButton> emptyButtons = myButtons.stream()
-                    .filter(button -> button.getMyChar() == null)
-                    .collect(Collectors.toList());
-            MyButton button = emptyButtons.get(random.nextInt(emptyButtons.size()));
+            MyButton button = chooseCompButton();
 
             array[button.getCol()][button.getRow()] = compChar;
             button.setFill(new ImagePattern(changeImage(compChar)));
             button.setChar(compChar);
-            liczbaRuchow++;
+            numberOfMoves++;
         }
+    }
+
+    private MyButton chooseCompButton() {
+        // 1 check if comp can win
+        // row first
+        MyButton chosenButton;
+        chosenButton = checkRowByComp(0);
+        if (chosenButton != null) {
+            return chosenButton;
+        }
+        chosenButton = checkRowByComp(1);
+        if (chosenButton != null) {
+            return chosenButton;
+        }
+        chosenButton = checkRowByComp(2);
+        if (chosenButton != null) {
+            return chosenButton;
+        }
+
+        List<MyButton> emptyButtons = myButtons.stream()
+                .filter(button -> button.getMyChar() == null)
+                .collect(Collectors.toList());
+        return emptyButtons.get(random.nextInt(emptyButtons.size()));
+    }
+
+    private MyButton checkRowByComp(int row) {
+        List<MyButton> rowFirst = Arrays.asList(getButton(0, row), getButton(1, row), getButton(2, row));
+
+        long numberOfCompButtons = rowFirst.stream()
+                .filter(button -> button.getMyChar() != null)
+                .filter(button -> compChar == button.getMyChar()).count();
+        long numberOfEmptyButtons = rowFirst.stream().filter(button -> button.getMyChar() == null).count();
+
+        if (numberOfCompButtons == 2 && numberOfEmptyButtons == 1) {
+            MyButton chosenButton =
+                    rowFirst.stream().filter(button -> button.getMyChar() == null).findFirst().orElseThrow();
+            return chosenButton;
+        }
+        return null;
+    }
+
+    private MyButton getButton(int col, int row) {
+        return myButtons.stream()
+                .filter(button -> button.getCol() == col)
+                .filter(button -> button.getRow() == row)
+                .findFirst().orElseThrow();
     }
 
     private void checkIfPlayerWon() {
         if (endPlayer()) {
             status.setText("GRATULACJE ZWYCIĘŻYŁEŚ!");
             gameOver = true;
-        } else if (liczbaRuchow == 9) {
+        } else if (numberOfMoves == 9) {
             status.setText("Brak możliwości ruchu - REMIS!");
             gameOver = true;
         } else {
@@ -130,7 +175,7 @@ public class Controller {
             array[button.getCol()][button.getRow()] = myChar;
             button.setFill(new ImagePattern(changeImage(myChar)));
             button.setChar(myChar);
-            liczbaRuchow++;
+            numberOfMoves++;
         }
     }
 
@@ -160,12 +205,13 @@ public class Controller {
         for (int wiersz = 0; wiersz < wymiar; wiersz++) {
             boolean wygrana = true;
             for (int kolumna = 0; kolumna < wymiar; kolumna++) {
-                if (array[wiersz][kolumna] != myChar){
+                if (array[wiersz][kolumna] != myChar) {
                     wygrana = false;
                     break;
                 }
             }
-            if (wygrana) return true;
+            if (wygrana)
+                return true;
         }
         return false;
     }
@@ -175,12 +221,13 @@ public class Controller {
         for (int kolumna = 0; kolumna < wymiar; kolumna++) {
             boolean wygrana = true;
             for (int wiersz = 0; wiersz < wymiar; wiersz++) {
-                if (array[wiersz][kolumna] != myChar){
+                if (array[wiersz][kolumna] != myChar) {
                     wygrana = false;
                     break;
                 }
             }
-            if (wygrana) return true;
+            if (wygrana)
+                return true;
         }
         return false;
     }
