@@ -8,7 +8,7 @@ public class NewGameButton extends Button {
 
     public NewGameButton() {
         setTextFill(Color.web("#000000"));
-        this.setStyle("-fx-background-color: #ADB3BC;");
+        setStyle("-fx-background-color: #ADB3BC;");
         setFont(new Font("Arial", 30));
         minHeight(160);
         minWidth(180);

@@ -1,5 +1,6 @@
 package com.kodilla.tictactoe;
 
+import javafx.concurrent.Task;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
@@ -20,6 +21,9 @@ public class Controller {
     private int liczbaRuchow = 0;
     private Label status = new Label();
     private boolean gameOver = false;
+    private boolean isHardOn = true;
+    private Choose_O chooseO;
+    private Choose_X chooseX;
 
     private Controller() {
     }
@@ -31,6 +35,8 @@ public class Controller {
     void addButton(MyButton button) {
         myButtons.add(button);
     }
+    void addChoose_X(Choose_X chooseX) {this.chooseX = chooseX;}
+    void addChoose_O(Choose_O chooseO) {this.chooseO = chooseO;}
 
     public void click(MyButton button) {
 
@@ -56,12 +62,26 @@ public class Controller {
         }
     }
 
+    public void setColor() {
+        if (myChar == 'X') {
+            chooseX.setStyle("-fx-border-color: #4BFAC0;" + "-fx-border-width: 3;" + "-fx-border-insets: 5;");
+            chooseO.setStyle("-fx-border-color:transparent");
+        } else if (myChar == 'O') {
+            chooseO.setStyle("-fx-border-color: #4BFAC0;" + "-fx-border-width: 3;" + "-fx-border-insets: 5;");
+            chooseX.setStyle("-fx-border-color:transparent");
+        } else {
+            chooseX.setStyle("-fx-border-color:transparent");
+            chooseO.setStyle("-fx-border-color:transparent");
+        }
+    }
+
     public void setXChar(Choose_X chooseX) {
         if (liczbaRuchow != 0) {
             status.setText("Zakończ obecną rozgrywkę");
         } else {
             myChar = 'X';
             compChar = 'O';
+            setColor();
         }
     }
 
@@ -71,6 +91,7 @@ public class Controller {
         } else {
             myChar = 'O';
             compChar = 'X';
+            setColor();
         }
     }
 
@@ -78,6 +99,7 @@ public class Controller {
         gameOver = false;
         myChar = 0;
         compChar = 0;
+        setColor();
         array = new char[3][3];
         liczbaRuchow = 0;
         myButtons.stream()
@@ -100,17 +122,31 @@ public class Controller {
     }
 
     private void makeComputerMove() {
+        if (!isHardOn) {
+            makeSimpleCompMove();
+        } else {
+            makeComplexCompMove();
+        }
+    }
+
+    private void makeSimpleCompMove() {
         if (!gameOver) {
+
             List<MyButton> emptyButtons = myButtons.stream()
                     .filter(button -> button.getMyChar() == null)
                     .collect(Collectors.toList());
             MyButton button = emptyButtons.get(random.nextInt(emptyButtons.size()));
-
             array[button.getCol()][button.getRow()] = compChar;
             button.setFill(new ImagePattern(changeImage(compChar)));
             button.setChar(compChar);
             liczbaRuchow++;
         }
+    }
+
+    private void makeComplexCompMove() {
+        //compMiddleMOve();
+        //compCornerMove();
+        checkCompRow();
     }
 
     private void checkIfPlayerWon() {
@@ -221,6 +257,35 @@ public class Controller {
             end = true;
         }
         return end;
+    }
+
+    public void compMiddleMOve() {
+            List<MyButton> emptyButtons = myButtons.stream()
+                    .filter(button -> button.getMyChar() == null)
+                    .filter(button -> button.getRow() == 1 && button.getCol() == 1)
+                    .collect(Collectors.toList());
+            MyButton button = emptyButtons.get(0);
+            array[button.getCol()][button.getRow()] = compChar;
+            button.setFill(new ImagePattern(changeImage(compChar)));
+            button.setChar(compChar);
+            liczbaRuchow++;
+    }
+
+    public void compCornerMove() {
+        List<MyButton> emptyButtons = myButtons.stream()
+                .filter(button -> button.getMyChar() == null)
+                .filter(button -> button.getRow() == 0 && button.getCol() == 0 || button.getRow() == 0 && button.getCol() == 2
+                || button.getRow() == 2 && button.getCol() == 0 || button.getRow() == 2 && button.getCol() == 2)
+                .collect(Collectors.toList());
+        MyButton button = emptyButtons.get(random.nextInt(emptyButtons.size()));
+        array[button.getCol()][button.getRow()] = compChar;
+        button.setFill(new ImagePattern(changeImage(compChar)));
+        button.setChar(compChar);
+        liczbaRuchow++;
+    }
+
+    public void checkCompRow() {
+        
     }
 
     public Label getStatus() {

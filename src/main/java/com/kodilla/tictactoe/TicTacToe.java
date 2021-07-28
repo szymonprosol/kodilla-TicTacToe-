@@ -36,9 +36,11 @@ public class TicTacToe extends Application {
         // choose X button
         Choose_X chooseX = new Choose_X();
         grid.add(chooseX,3,0,1,1);
+        Controller.getInstance().addChoose_X(chooseX);
         // choose O button
         Choose_O chooseO = new Choose_O();
         grid.add(chooseO,4,0,1,1);
+        Controller.getInstance().addChoose_O(chooseO);
         // status label
         status = Controller.getInstance().getStatus();
         grid.add(status, 3, 1, 1, 1);
