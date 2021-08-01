@@ -46,7 +46,7 @@ public class TicTacToe extends Application {
         grid.add(status, 3, 1, 1, 1);
 
         Scene scene = new Scene(grid, 960, 620, Color.BLUE);
-
+        scene.getRoot().setStyle("-fx-font-family: 'serif'");
         primaryStage.setTitle("Tic Tac Toe");
         primaryStage.setScene(scene);
         primaryStage.show();
