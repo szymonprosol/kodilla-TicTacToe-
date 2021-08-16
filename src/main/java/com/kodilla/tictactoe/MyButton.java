@@ -3,7 +3,9 @@ package com.kodilla.tictactoe;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
-public class MyButton extends Rectangle {
+import java.io.Serializable;
+
+public class MyButton extends Rectangle implements Serializable {
 
     private static final int SIZE = 200;
     private final int col;

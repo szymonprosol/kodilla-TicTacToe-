@@ -4,7 +4,9 @@ import javafx.scene.control.Button;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 
-public class Choose_O extends Button {
+import java.io.Serializable;
+
+public class Choose_O extends Button implements Serializable {
 
     public Choose_O() {
         this.setTextFill(Color.web("#000000"));
