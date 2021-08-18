@@ -85,6 +85,7 @@ public class TicTacToe extends Application implements Serializable {
 
     public void game() {
         GridPane grid = new GridPane();
+        grid.setPadding(new Insets(10, 10, 10, 10));
         grid.setHgap(10);
         grid.setVgap(10);
 
@@ -94,39 +95,53 @@ public class TicTacToe extends Application implements Serializable {
         for (int col = 0; col < 3; col++) {
             for (int row = 0; row < 3; row++) {
                 MyButton button = new MyButton(col, row);
-                grid.add(button, col, row, 1, 1);
+                GridPane.setConstraints(button, col, row);
+                grid.getChildren().add(button);
                 Controller.getInstance().addButton(button);
             }
         }
+
+        // load game button
+        LoadGameButton loadGameButton = new LoadGameButton();
+        GridPane.setConstraints(loadGameButton, 1, 3);
+        grid.getChildren().add(loadGameButton);
+
         // save game button
         SaveGameButton saveGameButton = new SaveGameButton();
-        grid.add(saveGameButton, 3,1,1,2);
+        GridPane.setConstraints(saveGameButton, 0, 3);
+        grid.getChildren().add(saveGameButton);
 
         // ranking button
         RankingButton rankingButton = new RankingButton();
-        grid.add(rankingButton,4,1,1,2);
+        GridPane.setConstraints(rankingButton, 2, 3);
+        grid.getChildren().add(rankingButton);
 
         // new game button
         NewGameButton nGmButton = new NewGameButton();
-        grid.add(nGmButton,3,2,1,1);
+        GridPane.setConstraints(nGmButton, 4,2 );
+        grid.getChildren().add(nGmButton);
 
         // difficulty level button
         SwitchButton sw = new SwitchButton();
-        grid.add(sw,3,0,1,2);
+        GridPane.setConstraints(sw, 3, 2);
+        grid.getChildren().add(sw);
         Controller.getInstance().addSwitchButton(sw);
         // choose X button
         Choose_X chooseX = new Choose_X();
-        grid.add(chooseX,3,0,1,1);
+        GridPane.setConstraints(chooseX, 3, 0);
+        grid.getChildren().add(chooseX);
         Controller.getInstance().addChoose_X(chooseX);
         // choose O button
         Choose_O chooseO = new Choose_O();
-        grid.add(chooseO,4,0,1,1);
+        GridPane.setConstraints(chooseO, 4, 0);
+        grid.getChildren().add(chooseO);
         Controller.getInstance().addChoose_O(chooseO);
         // status label
         status = Controller.getInstance().getStatus();
-        grid.add(status, 3, 1, 1, 1);
+        GridPane.setConstraints(status, 3, 1);
+        grid.getChildren().add(status);
 
-        Scene scene = new Scene(grid, 960, 620, Color.BLUE);
+        Scene scene = new Scene(grid, 950, 690, Color.BLUE);
         scene.getRoot().setStyle("-fx-font-family: 'serif'");
         Stage stage = new Stage();
         stage.setTitle("Tic Tac Toe");

@@ -10,7 +10,7 @@ public class Choose_O extends Button implements Serializable {
 
     public Choose_O() {
         this.setTextFill(Color.web("#000000"));
-        this.setStyle("-fx-background-color: #ADB3BC;");
+        setStyle("-fx-border-color:transparent");
         this.setFont(new Font("Arial", 50));
         this.minHeight(60);
         this.minWidth(60);

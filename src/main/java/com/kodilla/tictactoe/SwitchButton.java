@@ -10,10 +10,10 @@ public class SwitchButton extends Button {
 
     public SwitchButton() {
         ToggleButton toggleButton1 = new ToggleButton();
-        setTextFill(Color.web("#000000"));
-        setFont(new Font("Arial", 24));
-        minHeight(30);
-        minWidth(30);
+        setStyle("-fx-border-color:transparent");
+        setFont(new Font("Arial", 20));
+        minHeight(5);
+        minWidth(5);
         setText("HARD");
         setOnMouseClicked(event -> Controller.getInstance().setDifficultyLevel());
     }

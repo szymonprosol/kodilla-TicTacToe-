@@ -1,10 +1,9 @@
 package com.kodilla.tictactoe;
 
+import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -14,7 +13,7 @@ public class RankingButton extends Button {
 
     public RankingButton() {
         setTextFill(Color.web("#000000"));
-        setStyle("-fx-background-color: #ADB3BC;");
+        setStyle("-fx-border-color:transparent");
         setFont(new Font("Arial", 20));
         minHeight(5);
         minWidth(5);

@@ -10,7 +10,7 @@ public class Choose_X extends Button implements Serializable {
 
     public Choose_X() {
         setTextFill(Color.web("#000000"));
-        setStyle("-fx-background-color: #ADB3BC;");
+        setStyle("-fx-border-color:transparent");
         setFont(new Font("Arial", 50));
         minHeight(60);
         minWidth(60);

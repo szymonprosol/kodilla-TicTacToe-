@@ -6,10 +6,13 @@ import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.ObjectOutputStream;
+import java.io.IOException;
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -18,6 +21,7 @@ import java.util.stream.Collectors;
 
 public class Controller implements Serializable {
 
+    public static final String PATH_TO_STATE = "/Users/szymonrosol/IdeaProjects/kodilla-tictactoe/temp.txt";
     private static final Random random = new Random();
     private static final Controller instance = new Controller();
     private List<MyButton> myButtons = new ArrayList<>();
@@ -43,9 +47,18 @@ public class Controller implements Serializable {
     void addButton(MyButton button) {
         myButtons.add(button);
     }
-    void addChoose_X(Choose_X chooseX) {this.chooseX = chooseX;}
-    void addChoose_O(Choose_O chooseO) {this.chooseO = chooseO;}
-    void addSwitchButton(SwitchButton switchButton) {this.switchButton = switchButton;}
+
+    void addChoose_X(Choose_X chooseX) {
+        this.chooseX = chooseX;
+    }
+
+    void addChoose_O(Choose_O chooseO) {
+        this.chooseO = chooseO;
+    }
+
+    void addSwitchButton(SwitchButton switchButton) {
+        this.switchButton = switchButton;
+    }
 
     public void click(MyButton button) {
 
@@ -108,7 +121,7 @@ public class Controller implements Serializable {
         if (numberOfMoves != 0) {
             status.setText("Zakończ obecną rozgrywkę");
         } else {
-            if (isHardOn){
+            if (isHardOn) {
                 isHardOn = false;
                 switchButton.setStyle("-fx-border-color:transparent");
             } else {
@@ -522,7 +535,56 @@ public class Controller implements Serializable {
     public List<Player> getPlayers() {
         return players;
     }
+
     public void addPlayers(Player player) {
         players.add(player);
+    }
+
+    public void save() {
+        System.out.println("Save clicked");
+
+        String content = "";
+        for (MyButton myButton : myButtons) {
+            if (myButton.getMyChar() == null) {
+                content += "0";
+            } else if (myButton.getMyChar() == 'X') {
+                content += "1";
+            } else {
+                content += "2";
+            }
+        }
+
+        try {
+            Files.write(Path.of(PATH_TO_STATE),
+                    content.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void load() {
+        System.out.println("Load clicked");
+
+        try {
+            String content = new String(Files.readAllBytes(Paths.get(PATH_TO_STATE)));
+
+            for (int col = 0; col < 3; col++) {
+                for (int row = 0; row < 3; row++) {
+                    MyButton myButton = myButtons.get(col * 3 + row);
+                    String element = String.valueOf(content.charAt(col * 3 + row));
+                    if (element == "1") {
+                        myButton.setChar('X');
+                        myButton.setFill(new ImagePattern(changeImage('X')));
+                    } else if (element == "2") {
+                        myButton.setChar('O');
+                        myButton.setFill(new ImagePattern(changeImage('O')));
+                    }
+
+                }
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

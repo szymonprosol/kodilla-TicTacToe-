@@ -8,10 +8,10 @@ public class NewGameButton extends Button {
 
     public NewGameButton() {
         setTextFill(Color.web("#000000"));
-        setStyle("-fx-background-color: #ADB3BC;");
-        setFont(new Font("Arial", 30));
-        minHeight(160);
-        minWidth(180);
+        setStyle("-fx-border-color:transparent");
+        setFont(new Font("Arial", 20));
+        minHeight(5);
+        minWidth(5);
         setText("New Game");
         setOnMouseClicked(event -> Controller.getInstance().newGame(this));
     }
