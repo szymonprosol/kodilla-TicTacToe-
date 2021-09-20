@@ -3,14 +3,12 @@ package com.kodilla.tictactoe;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
-import java.io.Serializable;
-
-public class MyButton extends Rectangle implements Serializable {
+public class MyButton extends Rectangle {
 
     private static final int SIZE = 200;
     private final int col;
     private final int row;
-    private Character myChar;
+    private Character myChar = 0;
 
     public MyButton(int col, int row) {
         this.col = col;
@@ -31,6 +29,10 @@ public class MyButton extends Rectangle implements Serializable {
 
     public void setChar(Character myChar) {
         this.myChar = myChar;
+    }
+
+    public void resetChar() {
+        this.myChar = 0;
     }
 
     public Character getMyChar() {

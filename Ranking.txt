@@ -1,0 +1,6 @@
+szymon,2
+pawel,2
+dominik,0
+piotr,1
+cecylia,0
+krystian,0

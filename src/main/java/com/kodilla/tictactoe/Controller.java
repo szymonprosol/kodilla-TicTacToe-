@@ -6,8 +6,7 @@ import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
 
-import java.io.IOException;
-import java.io.Serializable;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -22,20 +21,20 @@ import java.util.stream.Collectors;
 public class Controller implements Serializable {
 
     public static final String PATH_TO_STATE = "/Users/szymonrosol/IdeaProjects/kodilla-tictactoe/temp.txt";
+    public static final String PATH_TO_STATE1 = "/Users/szymonrosol/IdeaProjects/kodilla-tictactoe/Ranking.txt";
     private static final Random random = new Random();
     private static final Controller instance = new Controller();
     private List<MyButton> myButtons = new ArrayList<>();
     private List<Player> players = new ArrayList<>();
     private char myChar = 0;
     private char compChar = 0;
-    private char[][] array = new char[3][3];
-    private int numberOfMoves = 0;
     private Label status = new Label();
     private boolean gameOver = false;
-    private boolean isHardOn = true;
+    private boolean isHardOn = false;
     private Choose_O chooseO;
     private Choose_X chooseX;
     private SwitchButton switchButton;
+    private Player player;
 
     private Controller() {
     }
@@ -58,6 +57,10 @@ public class Controller implements Serializable {
 
     void addSwitchButton(SwitchButton switchButton) {
         this.switchButton = switchButton;
+    }
+
+    public void createPlayer(String playerName) {
+        player = new Player(playerName, 0);
     }
 
     public void click(MyButton button) {
@@ -84,6 +87,13 @@ public class Controller implements Serializable {
         }
     }
 
+    public int isFieldFree() {
+        int numberOfFreeFields = myButtons.stream()
+                .filter(button -> button.getMyChar() == 0)
+                .collect(Collectors.toList()).size();
+        return numberOfFreeFields;
+    }
+
     public void setColor() {
         if (myChar == 'X') {
             chooseX.setStyle("-fx-border-color: #4BFAC0;" + "-fx-border-width: 3;" + "-fx-border-insets: 5;");
@@ -98,8 +108,8 @@ public class Controller implements Serializable {
     }
 
     public void setXChar(Choose_X chooseX) {
-        if (numberOfMoves != 0) {
-            status.setText("Zakończ obecną rozgrywkę");
+        if (isFieldFree() != 9) {
+            status.setText("End the current game");
         } else {
             myChar = 'X';
             compChar = 'O';
@@ -108,8 +118,8 @@ public class Controller implements Serializable {
     }
 
     public void setOChar(Choose_O chooseO) {
-        if (numberOfMoves != 0) {
-            status.setText("Zakończ obecną rozgrywkę");
+        if (isFieldFree() != 9) {
+            status.setText("End the current game");
         } else {
             myChar = 'O';
             compChar = 'X';
@@ -118,8 +128,8 @@ public class Controller implements Serializable {
     }
 
     public void setDifficultyLevel() {
-        if (numberOfMoves != 0) {
-            status.setText("Zakończ obecną rozgrywkę");
+        if (isFieldFree() != 9) {
+            status.setText("End the current game");
         } else {
             if (isHardOn) {
                 isHardOn = false;
@@ -136,24 +146,22 @@ public class Controller implements Serializable {
         myChar = 0;
         compChar = 0;
         setColor();
-        array = new char[3][3];
-        numberOfMoves = 0;
         myButtons.stream()
-                .forEach(el -> el.setChar(null));
+                .forEach(el -> el.resetChar());
         myButtons.stream()
                 .forEach(el -> el.setFill(Color.web("#ADB3BC")));
-        status.setText("Nowa gra - wybierz znak");
+        status.setText("New game, select a character");
     }
 
     private void checkIfComputerWon() {
         if (endComp()) {
-            status.setText("WYGRAŁ KOMPUTER!");
+            status.setText("Computer won!");
             gameOver = true;
-        } else if (numberOfMoves == 9) {
-            status.setText("Brak możliwości ruchu - REMIS!");
+        } else if (isFieldFree() == 0 && !endComp() && !endPlayer()) {
+            status.setText("TIE!");
             gameOver = true;
         } else {
-            status.setText("Twój ruch!");
+            status.setText("Your turn...");
         }
     }
 
@@ -168,13 +176,11 @@ public class Controller implements Serializable {
     private void makeSimpleCompMove() {
         if (!gameOver) {
             List<MyButton> emptyButtons = myButtons.stream()
-                    .filter(button -> button.getMyChar() == null)
+                    .filter(button -> button.getMyChar() == 0)
                     .collect(Collectors.toList());
             MyButton button = emptyButtons.get(random.nextInt(emptyButtons.size()));
-            array[button.getCol()][button.getRow()] = compChar;
             button.setFill(new ImagePattern(changeImage(compChar)));
             button.setChar(compChar);
-            numberOfMoves++;
         }
     }
 
@@ -263,7 +269,7 @@ public class Controller implements Serializable {
         }
 
         List<MyButton> emptyButtons = myButtons.stream()
-                .filter(button -> button.getMyChar() == null)
+                .filter(button -> button.getMyChar() == 0)
                 .collect(Collectors.toList());
         return emptyButtons.get(random.nextInt(emptyButtons.size()));
     }
@@ -272,13 +278,13 @@ public class Controller implements Serializable {
         List<MyButton> colSecond = Arrays.asList(getButton(col, 0), getButton(col, 1), getButton(col, 2));
 
         long numberOfPlayerButtons = colSecond.stream()
-                .filter(button -> button.getMyChar() != null)
+                .filter(button -> button.getMyChar() != 0)
                 .filter(button -> myChar == button.getMyChar()).count();
-        long numberOfEmptyButtons = colSecond.stream().filter(button -> button.getMyChar() == null).count();
+        long numberOfEmptyButtons = colSecond.stream().filter(button -> button.getMyChar() == 0).count();
 
         if (numberOfPlayerButtons == 2 && numberOfEmptyButtons == 1) {
             MyButton chosenButton =
-                    colSecond.stream().filter(button -> button.getMyChar() == null).findFirst().orElseThrow();
+                    colSecond.stream().filter(button -> button.getMyChar() == 0).findFirst().orElseThrow();
             return chosenButton;
         }
         return null;
@@ -288,13 +294,13 @@ public class Controller implements Serializable {
         List<MyButton> rowFirst = Arrays.asList(getButton(0, row), getButton(1, row), getButton(2, row));
 
         long numberOfPlayerButtons = rowFirst.stream()
-                .filter(button -> button.getMyChar() != null)
+                .filter(button -> button.getMyChar() != 0)
                 .filter(button -> myChar == button.getMyChar()).count();
-        long numberOfEmptyButtons = rowFirst.stream().filter(button -> button.getMyChar() == null).count();
+        long numberOfEmptyButtons = rowFirst.stream().filter(button -> button.getMyChar() == 0).count();
 
         if (numberOfPlayerButtons == 2 && numberOfEmptyButtons == 1) {
             MyButton chosenButton =
-                    rowFirst.stream().filter(button -> button.getMyChar() == null).findFirst().orElseThrow();
+                    rowFirst.stream().filter(button -> button.getMyChar() == 0).findFirst().orElseThrow();
             return chosenButton;
         }
         return null;
@@ -305,13 +311,13 @@ public class Controller implements Serializable {
         List<MyButton> Rake1 = Arrays.asList(getButton(0, 0), getButton(1, 1), getButton(2, 2));
 
         long numberOfPlayerButtons = Rake1.stream()
-                .filter(button -> button.getMyChar() != null)
+                .filter(button -> button.getMyChar() != 0)
                 .filter(button -> myChar == button.getMyChar()).count();
-        long numberOfEmptyButtons = Rake1.stream().filter(button -> button.getMyChar() == null).count();
+        long numberOfEmptyButtons = Rake1.stream().filter(button -> button.getMyChar() == 0).count();
 
         if (numberOfPlayerButtons == 2 && numberOfEmptyButtons == 1) {
             MyButton chosenButton =
-                    Rake1.stream().filter(button -> button.getMyChar() == null).findFirst().orElseThrow();
+                    Rake1.stream().filter(button -> button.getMyChar() == 0).findFirst().orElseThrow();
             return chosenButton;
         }
         return null;
@@ -321,13 +327,13 @@ public class Controller implements Serializable {
         List<MyButton> Rake2 = Arrays.asList(getButton(2, 0), getButton(1, 1), getButton(0, 2));
 
         long numberOfPlayerButtons = Rake2.stream()
-                .filter(button -> button.getMyChar() != null)
+                .filter(button -> button.getMyChar() != 0)
                 .filter(button -> myChar == button.getMyChar()).count();
-        long numberOfEmptyButtons = Rake2.stream().filter(button -> button.getMyChar() == null).count();
+        long numberOfEmptyButtons = Rake2.stream().filter(button -> button.getMyChar() == 0).count();
 
         if (numberOfPlayerButtons == 2 && numberOfEmptyButtons == 1) {
             MyButton chosenButton =
-                    Rake2.stream().filter(button -> button.getMyChar() == null).findFirst().orElseThrow();
+                    Rake2.stream().filter(button -> button.getMyChar() == 0).findFirst().orElseThrow();
             return chosenButton;
         }
         return null;
@@ -337,13 +343,13 @@ public class Controller implements Serializable {
         List<MyButton> colSecond = Arrays.asList(getButton(col, 0), getButton(col, 1), getButton(col, 2));
 
         long numberOfCompButtons = colSecond.stream()
-                .filter(button -> button.getMyChar() != null)
+                .filter(button -> button.getMyChar() != 0)
                 .filter(button -> compChar == button.getMyChar()).count();
-        long numberOfEmptyButtons = colSecond.stream().filter(button -> button.getMyChar() == null).count();
+        long numberOfEmptyButtons = colSecond.stream().filter(button -> button.getMyChar() == 0).count();
 
         if (numberOfCompButtons == 2 && numberOfEmptyButtons == 1) {
             MyButton chosenButton =
-                    colSecond.stream().filter(button -> button.getMyChar() == null).findFirst().orElseThrow();
+                    colSecond.stream().filter(button -> button.getMyChar() == 0).findFirst().orElseThrow();
             return chosenButton;
         }
         return null;
@@ -353,13 +359,13 @@ public class Controller implements Serializable {
         List<MyButton> rowFirst = Arrays.asList(getButton(0, row), getButton(1, row), getButton(2, row));
 
         long numberOfCompButtons = rowFirst.stream()
-                .filter(button -> button.getMyChar() != null)
+                .filter(button -> button.getMyChar() != 0)
                 .filter(button -> compChar == button.getMyChar()).count();
-        long numberOfEmptyButtons = rowFirst.stream().filter(button -> button.getMyChar() == null).count();
+        long numberOfEmptyButtons = rowFirst.stream().filter(button -> button.getMyChar() == 0).count();
 
         if (numberOfCompButtons == 2 && numberOfEmptyButtons == 1) {
             MyButton chosenButton =
-                    rowFirst.stream().filter(button -> button.getMyChar() == null).findFirst().orElseThrow();
+                    rowFirst.stream().filter(button -> button.getMyChar() == 0).findFirst().orElseThrow();
             return chosenButton;
         }
         return null;
@@ -369,13 +375,13 @@ public class Controller implements Serializable {
         List<MyButton> Rake1 = Arrays.asList(getButton(0, 0), getButton(1, 1), getButton(2, 2));
 
         long numberOfCompButtons = Rake1.stream()
-                .filter(button -> button.getMyChar() != null)
+                .filter(button -> button.getMyChar() != 0)
                 .filter(button -> compChar == button.getMyChar()).count();
-        long numberOfEmptyButtons = Rake1.stream().filter(button -> button.getMyChar() == null).count();
+        long numberOfEmptyButtons = Rake1.stream().filter(button -> button.getMyChar() == 0).count();
 
         if (numberOfCompButtons == 2 && numberOfEmptyButtons == 1) {
             MyButton chosenButton =
-                    Rake1.stream().filter(button -> button.getMyChar() == null).findFirst().orElseThrow();
+                    Rake1.stream().filter(button -> button.getMyChar() == 0).findFirst().orElseThrow();
             return chosenButton;
         }
         return null;
@@ -385,13 +391,13 @@ public class Controller implements Serializable {
         List<MyButton> Rake2 = Arrays.asList(getButton(2, 0), getButton(1, 1), getButton(0, 2));
 
         long numberOfCompButtons = Rake2.stream()
-                .filter(button -> button.getMyChar() != null)
+                .filter(button -> button.getMyChar() != 0)
                 .filter(button -> compChar == button.getMyChar()).count();
-        long numberOfEmptyButtons = Rake2.stream().filter(button -> button.getMyChar() == null).count();
+        long numberOfEmptyButtons = Rake2.stream().filter(button -> button.getMyChar() == 0).count();
 
         if (numberOfCompButtons == 2 && numberOfEmptyButtons == 1) {
             MyButton chosenButton =
-                    Rake2.stream().filter(button -> button.getMyChar() == null).findFirst().orElseThrow();
+                    Rake2.stream().filter(button -> button.getMyChar() == 0).findFirst().orElseThrow();
             return chosenButton;
         }
         return null;
@@ -409,40 +415,37 @@ public class Controller implements Serializable {
 
             MyButton button = chooseCompButton();
 
-            array[button.getCol()][button.getRow()] = compChar;
             button.setFill(new ImagePattern(changeImage(compChar)));
             button.setChar(compChar);
-            numberOfMoves++;
         }
     }
 
     private void checkIfPlayerWon() {
         if (endPlayer()) {
-            status.setText("GRATULACJE ZWYCIĘŻYŁEŚ!");
+            status.setText("You won!");
             gameOver = true;
-        } else if (numberOfMoves == 9) {
-            status.setText("Brak możliwości ruchu - REMIS!");
+            player.wonGameAdd();
+        } else if (isFieldFree() == 0 && !endComp() && !endPlayer()) {
+            status.setText("TIE!");
             gameOver = true;
         } else {
-            status.setText("Ruch komputera!");
+            status.setText("Computer turn...");
         }
     }
 
     private void makePlayerMove(MyButton button) {
         if (!gameOver) {
-            array[button.getCol()][button.getRow()] = myChar;
             button.setFill(new ImagePattern(changeImage(myChar)));
             button.setChar(myChar);
-            numberOfMoves++;
         }
     }
 
     private boolean validateMove(MyButton button) {
-        if (array[button.getCol()][button.getRow()] != 0 && !gameOver) {
+        if (button.getMyChar() != 0 && !gameOver) {
             status.setText("Wrong move!");
             return false;
         } else if (myChar == 0 || compChar == 0) {
-            status.setText("Nie wybrano znaku");
+            status.setText("No character selected");
             return false;
         }
         return true;
@@ -458,42 +461,51 @@ public class Controller implements Serializable {
         }
     }
 
+    public MyButton findButton(int row, int col) {
+        for (MyButton button : myButtons) {
+            if ((button.getRow() == row) && (button.getCol() == col)) {
+                return button;
+            }
+        }
+        return null;
+    }
+
     public boolean checkRow(char myChar) {
-        int wymiar = array.length;
-        for (int wiersz = 0; wiersz < wymiar; wiersz++) {
-            boolean wygrana = true;
-            for (int kolumna = 0; kolumna < wymiar; kolumna++) {
-                if (array[wiersz][kolumna] != myChar) {
-                    wygrana = false;
+        for (int row = 0; row < 3; row++) {
+            boolean win = true;
+            for (int col = 0; col < 3; col++) {
+                MyButton button = findButton(row, col);
+                if (!button.getMyChar().equals(myChar)) {
+                    win = false;
                     break;
                 }
             }
-            if (wygrana)
+            if (win)
                 return true;
         }
         return false;
     }
 
     public boolean checkCol(char myChar) {
-        int wymiar = array.length;
-        for (int kolumna = 0; kolumna < wymiar; kolumna++) {
-            boolean wygrana = true;
-            for (int wiersz = 0; wiersz < wymiar; wiersz++) {
-                if (array[wiersz][kolumna] != myChar) {
-                    wygrana = false;
+        for (int col = 0; col < 3; col++) {
+            boolean win = true;
+            for (int row = 0; row < 3; row++) {
+                MyButton button = findButton(row, col);
+                if (button.getMyChar() != myChar) {
+                    win = false;
                     break;
                 }
             }
-            if (wygrana)
+            if (win)
                 return true;
         }
         return false;
     }
 
     public boolean checkSkos1(char myChar) {
-        int wymiar = array.length;
-        for (int i = 0; i < wymiar; i++) {
-            if (array[i][i] != myChar) {
+        for (int i = 0; i < 3; i++) {
+            MyButton button = findButton(i, i);
+            if (button.getMyChar() != myChar) {
                 return false;
             }
         }
@@ -501,13 +513,13 @@ public class Controller implements Serializable {
     }
 
     public boolean checkSkos2(char myChar) {
-        int wymiar = array.length;
-        int pom = 2;
-        for (int i = 0; i < wymiar; i++) {
-            if (array[i][pom] != myChar) {
+        int auxiliary = 2;
+        for (int i = 0; i < 3; i++) {
+            MyButton button = findButton(i, auxiliary);
+            if (button.getMyChar() != myChar) {
                 return false;
             }
-            pom--;
+            auxiliary--;
         }
         return true;
     }
@@ -536,22 +548,24 @@ public class Controller implements Serializable {
         return players;
     }
 
-    public void addPlayers(Player player) {
-        players.add(player);
-    }
-
     public void save() {
-        System.out.println("Save clicked");
+        status.setText("Save clicked");
 
         String content = "";
         for (MyButton myButton : myButtons) {
-            if (myButton.getMyChar() == null) {
+            if (myButton.getMyChar() == 0) {
                 content += "0";
             } else if (myButton.getMyChar() == 'X') {
                 content += "1";
             } else {
                 content += "2";
             }
+        }
+
+        if (myChar == 'X') {
+            content += "5";
+        } else if (myChar == 'O') {
+            content += "6";
         }
 
         try {
@@ -563,7 +577,7 @@ public class Controller implements Serializable {
     }
 
     public void load() {
-        System.out.println("Load clicked");
+        status.setText("Load clicked");
 
         try {
             String content = new String(Files.readAllBytes(Paths.get(PATH_TO_STATE)));
@@ -572,17 +586,67 @@ public class Controller implements Serializable {
                 for (int row = 0; row < 3; row++) {
                     MyButton myButton = myButtons.get(col * 3 + row);
                     String element = String.valueOf(content.charAt(col * 3 + row));
-                    if (element == "1") {
+                    if (element.equals("1")) {
                         myButton.setChar('X');
                         myButton.setFill(new ImagePattern(changeImage('X')));
-                    } else if (element == "2") {
+                    } else if (element.equals("2")) {
                         myButton.setChar('O');
                         myButton.setFill(new ImagePattern(changeImage('O')));
                     }
+                    element = String.valueOf(content.charAt(9));
+                    if (element.equals("5")) {
+                        myChar = 'X';
+                        compChar = 'O';
+                    } else if (element.equals("6")) {
+                        myChar = 'O';
+                        compChar = 'X';
+                    }
+                    setColor();
 
                 }
             }
 
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void saveRankList() {
+
+        String content = null;
+        try {
+            content = new String(Files.readAllBytes(Paths.get(PATH_TO_STATE1)));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        content += (player.getName() + "," + player.getWonGames() + "\n");
+
+
+        try {
+            Files.write(Path.of(PATH_TO_STATE1),
+                    content.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void loadRankList() {
+
+        try {
+
+            BufferedReader bufferedReader = new BufferedReader(new FileReader("Ranking.txt"));
+            String line = bufferedReader.readLine();
+            while (line != null) {
+                int index = line.indexOf(',');
+                String name = line.substring(0, index);
+                int wonGames = Integer.parseInt(line.substring(index + 1));
+                players.add(new Player(name, wonGames));
+                line = bufferedReader.readLine();
+            }
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }

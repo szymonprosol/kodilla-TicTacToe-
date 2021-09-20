@@ -4,9 +4,9 @@ public class Player {
     private String name;
     private int wonGames;
 
-    public Player(String name) {
+    public Player(String name, int wonGames) {
         this.name = name;
-        wonGames = 0;
+        this.wonGames = wonGames;
     }
 
     public String getName() {
@@ -21,7 +21,7 @@ public class Player {
         return wonGames;
     }
 
-    public void setWonGames(int wonGames) {
-        this.wonGames = wonGames;
+    public void wonGameAdd() {
+        wonGames++;
     }
 }

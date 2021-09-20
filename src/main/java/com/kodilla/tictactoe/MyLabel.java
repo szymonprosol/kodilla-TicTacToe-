@@ -2,12 +2,10 @@ package com.kodilla.tictactoe;
 
 import javafx.scene.control.Label;
 
-import java.io.Serializable;
+public class MyLabel extends Label {
 
-public class MyLabel extends Label implements Serializable {
-
-    private static final int vSize = 150;
-    private static final int hSize = 50;
+    private static final int vSize = 15;
+    private static final int hSize = 10;
     private final int col;
     private final int row;
     private String text;

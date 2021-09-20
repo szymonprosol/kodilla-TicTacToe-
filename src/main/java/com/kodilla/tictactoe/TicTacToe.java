@@ -1,6 +1,7 @@
 package com.kodilla.tictactoe;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -8,20 +9,15 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.*;
+import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
-import java.io.Serializable;
-import java.util.List;
-import java.util.Locale;
-
-
-public class TicTacToe extends Application implements Serializable {
+public class TicTacToe extends Application {
 
     private Label status = new Label();
-    public String playerName;
+
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -31,10 +27,10 @@ public class TicTacToe extends Application implements Serializable {
         grid1.setPadding(new Insets(10, 10, 10, 10));
         grid1.setVgap(5);
         grid1.setHgap(5);
-        final TextField name = new TextField();
+        TextField name = new TextField();
         name.setPromptText("Enter your name.");
         name.setPrefColumnCount(10);
-        playerName = name.getText().toLowerCase();
+        Label stat = new Label();
         Button submit = new Button("Submit");
         GridPane.setConstraints(submit, 1, 0);
         grid1.getChildren().add(submit);
@@ -43,6 +39,8 @@ public class TicTacToe extends Application implements Serializable {
         grid1.getChildren().add(clear);
         GridPane.setConstraints(name, 0, 0);
         grid1.getChildren().add(name);
+        GridPane.setConstraints(stat, 0, 1);
+        grid1.getChildren().add(stat);
 
         //Setting an action for the Submit button
         submit.setOnAction(new EventHandler<ActionEvent>() {
@@ -50,17 +48,20 @@ public class TicTacToe extends Application implements Serializable {
             @Override
             public void handle(ActionEvent e) {
                 boolean isPlayer = false;
-                for (Player player : Controller.getInstance().getPlayers()){
-                    if (player.getName() == playerName) {
+                String playerName = name.getText().toLowerCase();
+                Controller.getInstance().loadRankList();
+                for (Player player : Controller.getInstance().getPlayers()) {
+                    if (player.getName().equals(playerName)) {
                         isPlayer = true;
                         break;
                     }
                 }
-                if (isPlayer){
-                    System.out.println("nazwa gracza jest zajeta");
+                if (isPlayer) {
+                    stat.setText("The player's name is already taken");
+                } else if (playerName == "") {
+                    stat.setText("Player name cannot be empty");
                 } else {
-                    Player player = new Player(playerName);
-                    Controller.getInstance().addPlayers(player);
+                    Controller.getInstance().createPlayer(playerName);
                     primaryStage.close();
                     game();
                 }
@@ -116,9 +117,28 @@ public class TicTacToe extends Application implements Serializable {
         GridPane.setConstraints(rankingButton, 2, 3);
         grid.getChildren().add(rankingButton);
 
+        // exit button
+        Button exit = new Button();
+        exit.setTextFill(Color.web("#000000"));
+        exit.setStyle("-fx-border-color:transparent");
+        exit.setFont(new Font("Arial", 20));
+        exit.minHeight(5);
+        exit.minWidth(5);
+        exit.setText("EXIT");
+        GridPane.setConstraints(exit, 3, 3);
+        grid.getChildren().add(exit);
+        exit.setOnAction(new EventHandler<ActionEvent>() {
+
+            @Override
+            public void handle(ActionEvent e) {
+                Controller.getInstance().saveRankList();
+                Platform.exit();
+            }
+        });
+
         // new game button
         NewGameButton nGmButton = new NewGameButton();
-        GridPane.setConstraints(nGmButton, 4,2 );
+        GridPane.setConstraints(nGmButton, 4, 2);
         grid.getChildren().add(nGmButton);
 
         // difficulty level button
